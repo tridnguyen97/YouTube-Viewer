@@ -3,7 +3,7 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gio, Gtk
-from utils.constants import PROXY_FILE_DIR
+from utils.constants import PROXY_FILE_DIR, PROXY_TYPES
 
 
 class ProxyView(Gtk.Dialog):
@@ -28,6 +28,17 @@ class ProxyView(Gtk.Dialog):
         file_select_btn.add_filter(text_filter)
         file_select_btn.connect("selection-changed", self.on_file_selected)
        
+        proxy_store = Gtk.ListStore(str)
+        
+        for proxy_type in PROXY_TYPES:
+            proxy_store.append([proxy_type])
+
+        country_combo = Gtk.ComboBox.new_with_model(proxy_store)
+        country_combo.connect("changed", self.on_country_combo_changed)
+        renderer_text = Gtk.CellRendererText()
+        country_combo.pack_start(renderer_text, True)
+        country_combo.add_attribute(renderer_text, "text", 0)
+
         scrolledwindow = Gtk.ScrolledWindow()
         scrolledwindow.set_hexpand(True)
         scrolledwindow.set_vexpand(True)
@@ -72,3 +83,9 @@ class ProxyView(Gtk.Dialog):
             fs.write(proxy_list)
             fs.close()
             self.destroy()
+
+    def on_proxy_combo_changed(self, combo):
+        tree_iter = combo.get_active_iter()
+        if tree_iter is not None:
+            instance = combo.get_model()
+            country = instance[tree_iter][0]

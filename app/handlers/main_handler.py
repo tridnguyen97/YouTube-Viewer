@@ -2,7 +2,7 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gio, Gtk
-from handlers.url_handler import UrlHandler
+from handlers.setting_handler import SettingHandler
 from views.url_view import UrlView
 from views.proxy_view import ProxyView
 
@@ -23,4 +23,8 @@ class MainHandler:
         pass
 
     def on_settings_pressed(self, *args):
-        pass
+        builder = Gtk.Builder()
+        builder.add_from_file("./ui/SettingView.glade")
+        builder.connect_signals(SettingHandler())
+        window = builder.get_object("setting-view")
+        window.show_all()
