@@ -34,7 +34,7 @@ class ProxyView(Gtk.Dialog):
             proxy_store.append([proxy_type])
 
         country_combo = Gtk.ComboBox.new_with_model(proxy_store)
-        country_combo.connect("changed", self.on_country_combo_changed)
+        country_combo.connect("changed", self.on_proxy_combo_changed)
         renderer_text = Gtk.CellRendererText()
         country_combo.pack_start(renderer_text, True)
         country_combo.add_attribute(renderer_text, "text", 0)
