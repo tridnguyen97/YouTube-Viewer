@@ -3,7 +3,6 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gio, Gtk
-from views.main_view import MainView
 from handlers.main_handler import MainHandler
 
 
@@ -49,7 +48,6 @@ class Application(Gtk.Application):
             self.builder = Gtk.Builder()
             self.builder.add_from_file("./ui/MainView.glade")
             self.builder.connect_signals(MainHandler())
-            # self.window = MainView(application=self, title="Main Window")
             self.window = self.builder.get_object("main-window")
             self.window.set_application(self)
         self.window.present()

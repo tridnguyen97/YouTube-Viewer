@@ -2,9 +2,10 @@ import gi
 
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gio, Gtk
-from handlers.setting_handler import SettingHandler
+from views.setting_view import SettingView
 from views.url_view import UrlView
 from views.proxy_view import ProxyView
+from youtubeviewer.config import create_config
 
 class MainHandler:
 
@@ -23,8 +24,12 @@ class MainHandler:
         pass
 
     def on_settings_pressed(self, *args):
-        builder = Gtk.Builder()
-        builder.add_from_file("./ui/SettingView.glade")
-        builder.connect_signals(SettingHandler())
-        window = builder.get_object("setting-view")
-        window.show_all()
+        setting_dialog = SettingView()
+        response = setting_dialog.run()
+        if response == Gtk.ResponseType.OK:
+            print("OK button clicked")
+            print(setting_dialog.__dict__)
+        else:
+            print("Dialog closed")
+
+        setting_dialog.destroy()

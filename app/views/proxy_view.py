@@ -10,6 +10,8 @@ class ProxyView(Gtk.Dialog):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        print(args)
+        print(kwargs)
 
         main_layout = self.get_content_area()
         file_url_box = Gtk.Box(spacing=6)

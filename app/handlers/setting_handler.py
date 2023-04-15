@@ -14,9 +14,3 @@ class SettingHandler:
 
     def on_proxy_manual_toggled(self, *args):
         pass
-
-    def on_apply_setting_clicked(self, *args):
-        pass
-
-    def on_setting_cancel_clicked(self, *args):
-        pass
