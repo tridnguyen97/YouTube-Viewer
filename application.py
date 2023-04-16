@@ -5,7 +5,7 @@ gi.require_version("Gtk", "3.0")
 # gi.require_version('WebKit', '3.0')
 from gi.repository import GLib, Gio, Gtk
 from handlers.main_handler import MainHandler
-from utils.constants import MAINVIEW_DIR
+from utils.constants import MAINVIEW_DIR, MENU_DIR
 
 class Application(Gtk.Application):
 
@@ -35,7 +35,7 @@ class Application(Gtk.Application):
         action = Gio.SimpleAction.new("quit", None)
         action.connect("activate", self.on_quit)
         self.add_action(action)
-        with open("./ui/menu.xml", "r") as fs:
+        with open(MENU_DIR, "r") as fs:
             menu_xml = fs.read()
             fs.close()
         builder = Gtk.Builder.new_from_string(menu_xml, -1)
