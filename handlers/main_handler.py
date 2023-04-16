@@ -6,6 +6,8 @@ from views.setting_view import SettingView
 from views.url_view import UrlView
 from views.proxy_view import ProxyView
 from youtubeviewer.config import create_config
+from utils.constants import BATCH_FILE_DIR
+# from youtube_viewer import main
 
 class MainHandler:
 
@@ -20,9 +22,6 @@ class MainHandler:
         proxy_dialog = ProxyView()
         proxy_dialog.present()
 
-    def on_kill_drive_pressed(self, *args):
-        pass
-
     def on_settings_pressed(self, *args):
         setting_dialog = SettingView()
         response = setting_dialog.run()
@@ -33,3 +32,7 @@ class MainHandler:
             print("Dialog closed")
 
         setting_dialog.destroy()
+
+    def on_run_clicked(self, *args):
+        # main()
+        pass

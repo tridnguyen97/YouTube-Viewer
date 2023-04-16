@@ -8,6 +8,7 @@ URL_FILE_DIR = os.path.join(BASE_DIR, "urls.txt")
 PROXY_FILE_DIR = os.path.join(BASE_DIR, "proxy.txt")
 MAINVIEW_DIR = os.path.join(BASE_DIR, "ui/MainView.glade")
 SETTINGVIEW_DIR = os.path.join(BASE_DIR, "ui/SettingView.glade")
+BATCH_FILE_DIR = os.path.join(BASE_DIR, "killdrive.bat")
 PROXY_TYPES = [
     "HTTP",
     "SOCKS4",

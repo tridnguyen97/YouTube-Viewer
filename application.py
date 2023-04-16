@@ -2,6 +2,7 @@ import sys
 import gi
 
 gi.require_version("Gtk", "3.0")
+# gi.require_version('WebKit', '3.0')
 from gi.repository import GLib, Gio, Gtk
 from handlers.main_handler import MainHandler
 from utils.constants import MAINVIEW_DIR
@@ -49,6 +50,11 @@ class Application(Gtk.Application):
             self.builder.add_from_file(MAINVIEW_DIR)
             self.builder.connect_signals(MainHandler())
             self.window = self.builder.get_object("main-window")
+            # self.webview = WebKit.WebView()
+            # scrolled_window = self.builder.get_object("web-view")
+            # scrolled_window.add(self.webview)
+            # self.webview.load_uri("http://localhost:5000")
+            # self.add(scrolled_window)
             self.window.set_application(self)
         self.window.present()
 
