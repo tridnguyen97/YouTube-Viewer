@@ -1,14 +1,19 @@
-import os
-from pathlib import Path
+import sys, os
 
-cur_abs_path = Path(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-BASE_DIR = cur_abs_path.parents[1]
-URL_FILE_DIR = os.path.join(BASE_DIR, "urls.txt")
-PROXY_FILE_DIR = os.path.join(BASE_DIR, "proxy.txt")
-MAINVIEW_DIR = os.path.join(BASE_DIR, "ui/MainView.glade")
-SETTINGVIEW_DIR = os.path.join(BASE_DIR, "ui/SettingView.glade")
-BATCH_FILE_DIR = os.path.join(BASE_DIR, "killdrive.bat")
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(BASE_DIR))
+    return os.path.join(base_path, relative_path)
+
+
+URL_FILE_DIR = resource_path("urls.txt")
+PROXY_FILE_DIR = resource_path("proxy.txt")
+MAINVIEW_DIR = resource_path("ui/MainView.glade")
+SETTINGVIEW_DIR = resource_path("ui/SettingView.glade")
+MENU_DIR = resource_path("ui/menu.xml")
+BATCH_FILE_DIR = resource_path("killdrive.bat")
 PROXY_TYPES = [
     "HTTP",
     "SOCKS4",
