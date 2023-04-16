@@ -4,7 +4,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gio, Gtk
 from handlers.main_handler import MainHandler
-
+from utils.constants import MAINVIEW_DIR
 
 class Application(Gtk.Application):
 
@@ -46,7 +46,7 @@ class Application(Gtk.Application):
             # Windows are associated with the application
             # when the last one is closed the application shuts down
             self.builder = Gtk.Builder()
-            self.builder.add_from_file("./ui/MainView.glade")
+            self.builder.add_from_file(MAINVIEW_DIR)
             self.builder.connect_signals(MainHandler())
             self.window = self.builder.get_object("main-window")
             self.window.set_application(self)

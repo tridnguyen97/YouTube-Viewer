@@ -4,14 +4,14 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk
 from handlers.setting_handler import SettingHandler
-
+from utils.constants import SETTINGVIEW_DIR
 
 class SettingView(Gtk.Dialog):
 
     def __init__(self,  *args, **kwargs):
         Gtk.Dialog.__init__(self, *args, **kwargs)
         builder = Gtk.Builder()
-        builder.add_from_file("./ui/SettingView.glade")
+        builder.add_from_file(SETTINGVIEW_DIR)
         builder.connect_signals(SettingHandler())
         self.dialog = builder.get_object("setting-view")
         apply_btn = Gtk.Button(label="Apply")
