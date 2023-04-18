@@ -7,7 +7,7 @@ from views.url_view import UrlView
 from views.proxy_view import ProxyView
 from youtubeviewer.config import create_config
 from utils.constants import BATCH_FILE_DIR
-# from youtube_viewer import main
+from youtube_viewer import main2
 
 class MainHandler:
 
@@ -33,6 +33,9 @@ class MainHandler:
 
         setting_dialog.destroy()
 
+    def load_value():
+        pass
+
     def on_run_clicked(self, *args):
-        # main()
+        main2()
         pass

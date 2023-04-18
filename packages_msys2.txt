@@ -1,0 +1,15 @@
+base 2022.06-1
+filesystem 2023.02.07-1
+gcc 11.3.0-3
+libffi-devel 3.4.4-1
+make 4.4.1-1
+mingw-w64-clang-x86_64-python-pip 23.0.1-1
+mingw-w64-x86_64-gtk3 3.24.37.r22.gf1b6556-2
+mingw-w64-x86_64-python 3.10.11-1
+mingw-w64-x86_64-python-cffi 1.15.1-2
+mingw-w64-x86_64-python-cryptography 40.0.1-1
+mingw-w64-x86_64-python-gobject 3.44.1-1
+mingw-w64-x86_64-python-pip 23.0.1-1
+mingw-w64-x86_64-python-psutil 5.9.4-1
+mingw-w64-x86_64-python-pywin32 306-1
+msys2-runtime 3.4.6-2

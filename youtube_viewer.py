@@ -993,8 +993,7 @@ def main():
             raise KeyboardInterrupt
 
 
-if __name__ == '__main__':
-
+def main2():
     clean_exe_temp(folder='youtube_viewer')
     date_fmt = datetime.now().strftime("%d-%b-%Y %H:%M:%S")
     cpu_usage = str(psutil.cpu_percent(1))
