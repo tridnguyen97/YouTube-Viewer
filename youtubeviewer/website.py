@@ -114,11 +114,13 @@ def create_dropdown_data():
 
 
 def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
-
+    try:
+        func = request.environ.get('werkzeug.server.shutdown')
+        if func is None:
+            raise RuntimeError('Not running with the Werkzeug Server')
+        func()
+    except Exception as e:
+        return f"Error: {str(e)}", 500
 
 def start_server(host, port, debug=False):
     app = Flask(__name__,

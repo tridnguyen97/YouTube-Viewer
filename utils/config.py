@@ -1,13 +1,15 @@
 import json
+from utils.constants import CONFIG_FILE_DIR
 
 def get_config() -> dict:
     try:
-        with open('config.json', 'r', encoding='utf-8-sig') as f:
+        with open(CONFIG_FILE_DIR, 'r', encoding='utf-8-sig') as f:
             config_list = f.read()
             config = json.loads(config_list)
+        return config
     except Exception as e:
         print(e)
-    return config
+
 
 def config_api(config, enabled=True, port=5000):
     config["http_api"] = {

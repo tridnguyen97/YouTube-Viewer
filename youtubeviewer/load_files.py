@@ -33,12 +33,11 @@ def load_url():
     with open('urls.txt', encoding="utf-8") as fh:
         links = [x.strip() for x in fh if x.strip() != '']
 
-    print(bcolors.OKGREEN +
-          f'{len(links)} url loaded from urls.txt' + bcolors.ENDC)
+    message = bcolors.OKGREEN + f'{len(links)} url loaded from urls.txt' + bcolors.ENDC
 
     links = choices(links, k=len(links)*3) + links
 
-    return links
+    return links, message
 
 
 def load_search():
