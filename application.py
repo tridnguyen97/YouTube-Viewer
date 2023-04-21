@@ -47,7 +47,7 @@ class Application(Gtk.Application):
             # when the last one is closed the application shuts down
             self.builder = Gtk.Builder()
             self.builder.add_from_file(MAINVIEW_DIR)
-            self.builder.connect_signals(MainHandler())
+            main_handler = MainHandler(self.builder) 
             self.window = self.builder.get_object("main-window")
             self.window.set_application(self)
         self.window.present()

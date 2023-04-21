@@ -111,7 +111,10 @@ class MainHandler:
 
         browsers.chrome_ver = chrome_versions
 
-    def __init__(self):
+    def __init__(self, builder):
+        self.builder = builder
+        self.builder.connect_signals(self)
+
         self.futures = ''
         self.osname = ''
         self.exe_name = ''
@@ -138,6 +141,9 @@ class MainHandler:
         self.referers = REFERERS
         self.constructor = None
         self.width = 0
+        self.loop = 0
+        
+        
 
         self.cwd = os.getcwd()
         self.fake = Faker()
@@ -158,15 +164,15 @@ class MainHandler:
 
         self.urls, self.message = load_url()
         self.queries = load_search()
+        self.done = ""
+        self.not_done = ""
         
         hash_urls = get_hash("urls.txt")
         hash_queries = get_hash("search.txt")
-        hash_config = get_hash(CONFIG_FILE_DIR)
+        self.hash_config = get_hash(CONFIG_FILE_DIR)
 
-        builder = Gtk.Builder()
-        builder.add_from_file(MAINVIEW_DIR)
         self.display_text_view = builder.get_object("result-text")
-        self.display_text_view.set_buffer(Gtk.TextBuffer())        
+        self.text_buffer = self.display_text_view.get_buffer()        
     
     def monkey_patch_exe(self):
         linect = 0
@@ -196,12 +202,6 @@ class MainHandler:
 
         self.console.insert(0, html)
    
-    def set_text(self, text_view, text):
-        buffer = text_view.get_buffer()
-        print(buffer)
-        print(text)        
-        buffer.set_text(text)
-
     def direct_or_search(self, position):
         keyword = None
         video_title = None
@@ -413,10 +413,10 @@ class MainHandler:
         website.summary_table = tabulate(
             self.summary.values(), headers=HEADERS_1, numalign='center', stralign='center', tablefmt="html")
 
-        GLib.idle_add(self.set_text, self.display_text_view, (self.timestamp() + bcolors.OKBLUE + f"Worker {position} | " + bcolors.OKGREEN +
+        GLib.idle_add(self.text_buffer.insert_at_cursor, (self.timestamp() + bcolors.OKBLUE + f"Worker {position} | " + bcolors.OKGREEN +
             f"{proxy} --> {youtube} Found : {output} | Watch Duration : {duration} " + bcolors.ENDC),)
 
-        self.self.create_html({"#3b8eea": f"Worker {position} | ",
+        self.create_html({"#3b8eea": f"Worker {position} | ",
                     "#23d18b": f"{proxy.split('@')[-1]} --> {youtube} Found : {output} | Watch Duration : {duration} "})
 
         if youtube == 'Video' and collect_id:
@@ -435,8 +435,8 @@ class MainHandler:
             current_channel = 'Unknown'
 
         error = 0
-        loop = int(video_len/4)
-        for _ in range(loop):
+        self.loop = int(video_len/4)
+        for _ in range(self.loop):
             sleep(5)
             current_time = driver.execute_script(
                 "return document.getElementById('movie_player').getCurrentTime()")
@@ -486,7 +486,7 @@ class MainHandler:
                 view_stat = driver.find_element(
                     By.XPATH, '//*[@id="info"]/span[1]').text
             if 'watching' in view_stat:
-                self.set_text(self.display_text_view, self.timestamp() + f"Worker {position} | " +
+                GLib.idle_add(self.text_buffer.insert_at_cursor, self.timestamp() + f"Worker {position} | " +
                     f"{proxy} | {output} | " + f"{view_stat} ")
 
                 self.create_html({"#3b8eea": f"Worker {position} | ",
@@ -519,10 +519,10 @@ class MainHandler:
 
             else:
                 print(self.timestamp() + bcolors.OKBLUE +
-                    f"Worker {position} | Suggested video loop : {i}" + bcolors.ENDC)
+                    f"Worker {position} | Suggested video self.loop : {i}" + bcolors.ENDC)
 
                 self.create_html(
-                    {"#3b8eea": f"Worker {position} | Suggested video loop : {i}"})
+                    {"#3b8eea": f"Worker {position} | Suggested video self.loop : {i}"})
 
                 try:
                     output = play_next_video(driver, self.suggested)
@@ -561,7 +561,7 @@ class MainHandler:
                     raise Exception(
                         f"Error channel | {type(e).__name__} | {e.args[0] if e.args else ''}")
 
-                self.set_text(self.display_text_view, self.timestamp() +
+                GLib.idle_add(self.text_buffer.insert_at_cursor, self.timestamp() +
                     f"Worker {position} | {log}")
 
                 self.create_html({"#3b8eea": f"Worker {position} | {log}"})
@@ -781,7 +781,7 @@ class MainHandler:
     def stop_server(self, immediate=False):
         api, host, port = get_config_by_params("api", "host", "port")
         if not immediate:
-            self.set_text(self.display_text_view,
+            GLib.idle_add(self.text_buffer.insert_at_cursor,
                           'Allowing a maximum of 15 minutes to finish all the running drivers...')
             for _ in range(180):
                 sleep(5)
@@ -792,16 +792,16 @@ class MainHandler:
             for _ in range(10):
                 response = requests.post(f'http://127.0.0.1:{port}/shutdown')
                 if response.status_code == 200:
-                    self.set_text(self.display_text_view, 'Server shut down successfully!')
+                    GLib.idle_add(self.text_buffer.insert_at_cursor, 'Server shut down successfully!')
                     break
                 else:
-                    self.set_text(self.display_text_view,
+                    GLib.idle_add(self.text_buffer.insert_at_cursor,
                                   f'Server shut down error : {response.status_code}')
                     sleep(3)
 
 
     def clean_exit(self):
-        self.set_text(self.display_text_view,
+        GLib.idle_add(self.text_buffer.insert_at_cursor,
                       self.timestamp() + 'Cleaning up processes...')
         self.create_html({"#f3f342": "Cleaning up processes..."})
 
@@ -828,7 +828,7 @@ class MainHandler:
 
         self.clean_exit()
 
-    def view_video(self, position, event):
+    def view_video(self, position):
         try:
             proxy_type, host, port, api = get_config_by_params(
                 "proxy_type", "host", "port", "api"
@@ -858,22 +858,91 @@ class MainHandler:
                         self.main_viewer('socks5', proxy, position)
         except:
             traceback.print_exc()
-        event.set()
+
+    def check_done_thread(self):
+        views = 100
+        category, proxy_api, refresh, filename = get_config_by_params(
+            "category", "proxy_api", "refresh", "filename") 
+        print(self.not_done)
+        print(self.done)
+        try:
+            while self.not_done:
+                freshly_done, self.not_done = wait(self.not_done, timeout=1)
+                self.done |= freshly_done
+
+                self.loop += 1
+                for _ in range(70):
+                    cpu = str(psutil.cpu_percent(0.2))
+                    self.cpu_usage = cpu + '%' + ' ' * \
+                        (5-len(cpu)) if cpu != '0.0' else self.cpu_usage
+
+                if self.loop % 40 == 0:
+                    print(tabulate(self.video_statistics.items(),
+                        headers=HEADERS_2, showindex=True, tablefmt="pretty"))
+
+                if category == 'r' and proxy_api:
+                    self.proxies_from_api = scrape_api(link=filename)
+
+                if len(self.view) >= views:
+                    GLib.idle_add(self.text_buffer.insert_at_cursor, self.timestamp() + f'Amount of views added : {views} | Stopping program...')
+                    self.create_html(
+                        {"#f3f342": f'Amount of views added : {views} | Stopping program...'})
+
+                    self.cancel_pending_task(not_done=self.not_done)
+                    break
+
+                elif self.hash_config != get_hash(CONFIG_FILE_DIR):
+                    self.hash_config = get_hash(CONFIG_FILE_DIR)
+                    GLib.idle_add(self.text_buffer.insert_at_cursor, self.timestamp() + 
+                        'Modified config.json will be in effect soon...')
+                    self.create_html(
+                        {"#f3f342": 'Modified config.json will be in effect soon...'})
+
+                    self.cancel_pending_task(not_done=self.not_done)
+                    break
+
+                elif refresh != 0 and category != 'r':
+
+                    if (time() - start_time) > refresh*60:
+                        start_time = time()
+
+                        proxy_list_new = get_proxy_list()
+                        proxy_list_new = [
+                            x for x in proxy_list_new if x not in self.bad_proxies]
+
+                        proxy_list_old = [
+                            x for x in self.proxy_list[1:-1] if x not in self.bad_proxies]
+
+                        if sorted(proxy_list_new) != sorted(proxy_list_old):
+                            print(self.timestamp() + bcolors.WARNING +
+                                f'Refresh {refresh} minute triggered. Proxies will be reloaded soon...' + bcolors.ENDC)
+                            self.create_html(
+                                {"#f3f342": f'Refresh {refresh} minute triggered. Proxies will be reloaded soon...'})
+
+                            self.cancel_pending_task(not_done=self.not_done)
+                            break
+
+        except KeyboardInterrupt:
+            print(self.timestamp() + bcolors.WARNING +
+                'Hold on!!! Allow me a moment to close all the running drivers.' + bcolors.ENDC)
+            self.create_html(
+                {"#f3f342": 'Hold on!!! Allow me a moment to close all the running drivers.'})
+
+            self.cancel_pending_task(not_done=self.not_done)
+            raise KeyboardInterrupt
 
     def main_thread(self):
-        views = 100
-        event = threading.Event()
         category, proxy_api, filename, min_threads, max_threads, refresh, api =\
             get_config_by_params("category", "proxy_api", "filename", 
                                  "min_threads", "max_threads", "refresh", 
                                  "api")
         start_time = time()
-        hash_config = get_hash(CONFIG_FILE_DIR)
+        self.hash_config = get_hash(CONFIG_FILE_DIR)
 
         self.proxy_list = get_proxy_list()
-        self.set_text(self.display_text_view, "Hello")
+        self.text_buffer.insert_at_cursor("Hello")
         if category != 'r':
-            self.set_text(self.display_text_view, 
+            GLib.idle_add(self.text_buffer.insert_at_cursor,
                           f'Total proxies : {len(self.proxy_list)}')
 
         self.proxy_list = [x for x in self.proxy_list if x not in self.bad_proxies]
@@ -893,82 +962,18 @@ class MainHandler:
         if api:
             self.threads += 1
 
-        loop = 0
         pool_number = list(range(self.total_proxies))
         print("we are here")
 
         with ThreadPoolExecutor(max_workers=self.threads) as executor:
             try:
-                futures = [executor.submit(self.view_video, position, event)
+                futures = [executor.submit(self.view_video, position)
                     for position in pool_number]
+                self.done, self.not_done = wait(futures, timeout=0)
+                thread = threading.Thread(target=self.check_done_thread)
+                thread.start()
             except:
                 traceback.print_exc()
-            done, not_done = wait(futures, timeout=0)
-            try:
-                while not_done:
-                    freshly_done, not_done = wait(not_done, timeout=1)
-                    done |= freshly_done
-
-                    loop += 1
-                    for _ in range(70):
-                        cpu = str(psutil.cpu_percent(0.2))
-                        self.cpu_usage = cpu + '%' + ' ' * \
-                            (5-len(cpu)) if cpu != '0.0' else self.cpu_usage
-
-                    if loop % 40 == 0:
-                        print(tabulate(self.video_statistics.items(),
-                            headers=HEADERS_2, showindex=True, tablefmt="pretty"))
-
-                    if category == 'r' and proxy_api:
-                        self.proxies_from_api = scrape_api(link=filename)
-
-                    if len(self.view) >= views:
-                        GLib.idle_add(self.set_text, self.display_text_view, self.timestamp() + f'Amount of views added : {views} | Stopping program...')
-                        self.create_html(
-                            {"#f3f342": f'Amount of views added : {views} | Stopping program...'})
-
-                        self.cancel_pending_task(not_done=not_done)
-                        break
-
-                    elif hash_config != get_hash(CONFIG_FILE_DIR):
-                        hash_config = get_hash(CONFIG_FILE_DIR)
-                        GLib.idle_add(self.set_text, self.display_text_view, self.timestamp() + 
-                            'Modified config.json will be in effect soon...')
-                        self.create_html(
-                            {"#f3f342": 'Modified config.json will be in effect soon...'})
-
-                        self.cancel_pending_task(not_done=not_done)
-                        break
-
-                    elif refresh != 0 and category != 'r':
-
-                        if (time() - start_time) > refresh*60:
-                            start_time = time()
-
-                            proxy_list_new = get_proxy_list()
-                            proxy_list_new = [
-                                x for x in proxy_list_new if x not in self.bad_proxies]
-
-                            proxy_list_old = [
-                                x for x in self.proxy_list[1:-1] if x not in self.bad_proxies]
-
-                            if sorted(proxy_list_new) != sorted(proxy_list_old):
-                                print(self.timestamp() + bcolors.WARNING +
-                                    f'Refresh {refresh} minute triggered. Proxies will be reloaded soon...' + bcolors.ENDC)
-                                self.create_html(
-                                    {"#f3f342": f'Refresh {refresh} minute triggered. Proxies will be reloaded soon...'})
-
-                                self.cancel_pending_task(not_done=not_done)
-                                break
-
-            except KeyboardInterrupt:
-                print(self.timestamp() + bcolors.WARNING +
-                    'Hold on!!! Allow me a moment to close all the running drivers.' + bcolors.ENDC)
-                self.create_html(
-                    {"#f3f342": 'Hold on!!! Allow me a moment to close all the running drivers.'})
-
-                self.cancel_pending_task(not_done=not_done)
-                raise KeyboardInterrupt
         pass
     
     def on_add_url_pressed(self, *args):
@@ -990,9 +995,8 @@ class MainHandler:
 
         setting_dialog.destroy()
     
-    def do_background(self, views, max_threads):
-        thread = threading.current_thread()
-        logging.debug(f'main thread {thread.ident} starts ')
+    def do_background(self):
+        views, max_threads = get_config_by_params("views", "max_threads")
         if len(self.view) < views:
             copy_drivers(cwd=self.cwd, patched_drivers=PATCHED_DRIVERS_DIR,
                          exe=self.exe_name, total=max_threads)
@@ -1000,26 +1004,7 @@ class MainHandler:
             self.main_thread()
 
     def on_run_clicked(self, window):
-        logging.debug('Button clicked in main thread')
-        
-        GLib.idle_add(self.set_text, self.display_text_view, self.message)
-        print(self.urls)
-        self.set_text(self.display_text_view, "Hello")
-        buffer = self.display_text_view.get_buffer()         
-        buffer.set_text("Hello \n")
-        builder = Gtk.Builder()
-        builder.add_from_file(MAINVIEW_DIR)
-        window = builder.get_object("result-text")
-        window.show_all()
-        buffer = Gtk.TextBuffer()
-        buffer.insert_at_cursor("Good bye \n")
-        self.display_text_view.set_buffer(buffer)
-        print(self.display_text_view)
-        window = builder.get_object("result-text")
-        print(window.get_visible())
-        window.show_all()        
-        buffer.insert(buffer.get_end_iter(), "Button clicked\n")
-        # with ThreadPoolExecutor(max_workers=2) as exec:
-        #     views, max_threads = get_config_by_params("views", "max_threads")
-        #     future = exec.submit(self.do_background, views, max_threads)
+
+        with ThreadPoolExecutor(max_workers=2) as exec:
+            future = exec.submit(self.do_background)
         

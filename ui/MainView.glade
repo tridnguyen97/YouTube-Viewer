@@ -99,6 +99,18 @@
             <property name="y">190</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkTextView" id="test">
+            <property name="width-request">100</property>
+            <property name="height-request">80</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+          </object>
+          <packing>
+            <property name="x">257</property>
+            <property name="y">100</property>
+          </packing>
+        </child>
       </object>
     </child>
   </object>
